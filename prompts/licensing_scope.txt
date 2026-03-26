@@ -1,0 +1,30 @@
+Now analyze the contract for aggressive **Licensing Scope** clauses. Focus exclusively on these categories:
+
+1. **Strict/ambiguous usage definitions** — unclear or narrowly defined permitted uses that could inadvertently breach the license
+2. **Unclear authorized user terms** — ambiguous definitions of who can access the service (employees, contractors, affiliates, etc.)
+3. **Penalties for overuse** — disproportionate fees or punitive measures for exceeding license limits
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive licensing scope clauses are found, respond with exactly: No aggressive licensing scope clauses identified.

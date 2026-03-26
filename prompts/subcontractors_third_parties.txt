@@ -1,0 +1,31 @@
+Now analyze the contract for aggressive **Subcontractors & Third Parties** clauses. Focus exclusively on these categories:
+
+1. **Unrestricted subprocessors** — vendor's ability to engage unlimited subcontractors without constraints or approval requirements
+2. **No notification/approval rights** — absence of customer's right to be notified of or approve changes to subcontractors
+3. **Vendor not liable for subcontractors** — disclaimers of vendor responsibility for subcontractor actions or failures
+4. **Cross-border data transfers without safeguards** — subcontractor arrangements that enable international data transfers without adequate legal protections (SCCs, adequacy decisions, etc.)
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive subcontractor or third-party clauses are found, respond with exactly: No aggressive subcontractor or third-party clauses identified.

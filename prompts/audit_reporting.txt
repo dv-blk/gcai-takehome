@@ -1,0 +1,30 @@
+Now analyze the contract for aggressive **Audit & Reporting** clauses. Focus exclusively on these categories:
+
+1. **Vendor audit rights over customer with penalties** — broad vendor rights to audit customer usage with punitive consequences for discrepancies
+2. **No customer audit rights** — absence of customer's ability to audit vendor's security, compliance, or operational practices
+3. **Costly or burdensome audits** — customer audit rights conditioned on paying vendor's costs or meeting unreasonable requirements
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive audit or reporting clauses are found, respond with exactly: No aggressive audit or reporting clauses identified.

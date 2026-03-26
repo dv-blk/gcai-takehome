@@ -22,3 +22,6 @@ Thumbs.db
 *.dylib
 *.test
 *.out
+
+# Node.js
+node_modules/

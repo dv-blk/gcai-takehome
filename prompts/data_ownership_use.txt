@@ -1,0 +1,33 @@
+Now analyze the contract for aggressive **Data Ownership & Use** clauses. Focus exclusively on these categories:
+
+1. **Ambiguous ownership of customer data** — language that fails to clearly establish customer ownership or implies vendor ownership of customer-provided data
+2. **Broad vendor rights to use data** — permissions allowing vendor to use, analyze, or monetize customer data beyond service delivery, including AI/ML training
+3. **No clear data export rights** — absence of guaranteed ability to extract customer data in usable formats
+4. **Fees for data extraction** — charges imposed for accessing, exporting, or migrating customer data
+5. **No obligation to delete data** — lack of commitment to destroy customer data upon request or contract termination
+6. **Weak security commitments** — vague or non-binding data protection language without specific technical or organizational safeguards
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive data ownership or use clauses are found, respond with exactly: No aggressive data ownership or use clauses identified.

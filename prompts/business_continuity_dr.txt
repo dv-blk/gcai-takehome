@@ -1,0 +1,30 @@
+Now analyze the contract for aggressive **Business Continuity & Disaster Recovery** clauses. Focus exclusively on these categories:
+
+1. **No BCP/DR commitments** — absence of documented business continuity or disaster recovery plans
+2. **No RTO/RPO guarantees** — lack of specific Recovery Time Objective or Recovery Point Objective commitments
+3. **No backup assurances** — missing commitments regarding data backup frequency, retention, or restoration capabilities
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive business continuity or disaster recovery clauses are found, respond with exactly: No aggressive business continuity or disaster recovery clauses identified.

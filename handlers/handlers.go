@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"html/template"
@@ -15,6 +16,8 @@ import (
 	"contractanalyzer/models"
 	"contractanalyzer/pdfutil"
 	"contractanalyzer/storage"
+
+	"github.com/yuin/goldmark"
 )
 
 // Handler holds dependencies for HTTP handlers
@@ -29,6 +32,16 @@ func New(tmpl *template.Template, db *database.DB) *Handler {
 		tmpl: tmpl,
 		db:   db,
 	}
+}
+
+// renderMarkdown converts markdown text to HTML using goldmark
+func renderMarkdown(markdown string) template.HTML {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(markdown), &buf); err != nil {
+		log.Printf("Error rendering markdown: %v", err)
+		return template.HTML("<p>Error rendering content</p>")
+	}
+	return template.HTML(buf.String())
 }
 
 // PageData represents data passed to the main page template
@@ -75,6 +88,11 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 					if total > 0 {
 						submission.AnalysisPercent = (completed * 100) / total
 					}
+				}
+
+				// Render markdown to HTML if there are results
+				if submission.HasAnalysisResult() {
+					submission.AnalysisHTML = renderMarkdown(submission.GetAnalysisResult())
 				}
 
 				data.ActiveSubmission = submission
@@ -230,6 +248,11 @@ func (h *Handler) CreateSubmission(w http.ResponseWriter, r *http.Request) {
 	submission.AnalysisTotal = total
 	if total > 0 {
 		submission.AnalysisPercent = (completed * 100) / total
+	}
+
+	// Render markdown to HTML if there are results
+	if submission.HasAnalysisResult() {
+		submission.AnalysisHTML = renderMarkdown(submission.GetAnalysisResult())
 	}
 
 	// Render the submission view (will include polling for analyzing status)

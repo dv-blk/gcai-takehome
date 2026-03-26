@@ -1,0 +1,30 @@
+Now analyze the contract for aggressive **Assignment & Change of Control** clauses. Focus exclusively on these categories:
+
+1. **Vendor freely assigns** — vendor's unrestricted right to assign the contract to third parties without customer consent
+2. **Customer assignment restricted** — limitations or prohibitions on customer's ability to assign or transfer the contract
+3. **No termination on vendor acquisition** — absence of customer's right to terminate if vendor is acquired or undergoes change of control
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive assignment or change of control clauses are found, respond with exactly: No aggressive assignment or change of control clauses identified.

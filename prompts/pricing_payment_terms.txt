@@ -1,0 +1,33 @@
+Now analyze the contract for aggressive **Pricing & Payment Terms** clauses. Focus exclusively on these categories:
+
+1. **Auto-renewal with steep or uncapped price increases** — renewal terms that lock in automatic renewals with significant, vague, or unlimited price escalations
+2. **Non-cancelable, non-refundable fees** — terms that eliminate cancellation rights or refund eligibility
+3. **Upfront multi-year commitments** — requirements to prepay or commit to extended terms without flexibility
+4. **Usage overage penalties at inflated rates** — overage charges significantly above standard per-unit pricing
+5. **Short payment windows with high late fees** — payment terms with unreasonably short deadlines and disproportionate penalties
+6. **Bundled pricing that obscures true costs** — pricing structures that hide individual component costs or force purchase of unwanted services
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive pricing or payment terms are found, respond with exactly: No aggressive pricing or payment terms identified.

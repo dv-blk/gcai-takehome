@@ -1,0 +1,29 @@
+Now analyze the contract for aggressive **Insurance** clauses. Focus exclusively on these categories:
+
+1. **Minimal or no vendor insurance** — absence of required insurance coverage types (general liability, cyber liability, E&O, etc.)
+2. **No proof of coverage required** — lack of obligation for vendor to provide certificates of insurance or evidence of coverage
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive insurance clauses are found, respond with exactly: No aggressive insurance clauses identified.

@@ -1,0 +1,31 @@
+Now analyze the contract for aggressive **Confidentiality** clauses. Focus exclusively on these categories:
+
+1. **Narrow vendor protections, broad customer obligations** — asymmetric confidentiality duties where customer bears heavier obligations than vendor
+2. **Excessive disclosure carve-outs** — broad exceptions allowing vendor to disclose customer information to affiliates, partners, or other third parties
+3. **Short confidentiality terms** — protection periods that expire too quickly after contract termination
+4. **No subcontractor safeguards** — absence of requirements for vendor to bind subcontractors to equivalent confidentiality obligations
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive confidentiality clauses are found, respond with exactly: No aggressive confidentiality clauses identified.

@@ -1,0 +1,31 @@
+Now analyze the contract for aggressive **Intellectual Property (IP)** clauses. Focus exclusively on these categories:
+
+1. **Vendor owns all derivatives/improvements** — terms granting vendor ownership of customizations, configurations, or improvements created using customer input
+2. **Broad license to customer data** — expansive rights allowing vendor to use customer content, data, or feedback for product development or other purposes
+3. **Weak or no IP indemnity** — absent or limited vendor indemnification for third-party IP infringement claims
+4. **Restrictions on integrations/customizations** — prohibitions or limitations on customer's ability to integrate, extend, or customize the service
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive intellectual property clauses are found, respond with exactly: No aggressive intellectual property clauses identified.

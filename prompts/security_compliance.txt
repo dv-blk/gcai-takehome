@@ -1,0 +1,32 @@
+Now analyze the contract for aggressive **Security & Compliance** clauses. Focus exclusively on these categories:
+
+1. **Vague or non-binding security standards** — aspirational language ("commercially reasonable," "industry standard") without specific commitments
+2. **No commitment to security frameworks** — absence of SOC 2, ISO 27001, or other recognized certifications or audit standards
+3. **No breach notification timelines** — lack of specific timeframes for notifying customer of security incidents
+4. **Customer bears security responsibility** — terms shifting security obligations or liability to the customer
+5. **No audit rights** — denial of customer's ability to audit vendor security practices or obtain audit reports
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive security or compliance clauses are found, respond with exactly: No aggressive security or compliance clauses identified.

@@ -1,0 +1,32 @@
+Now analyze the contract for aggressive **Liability & Indemnification** clauses. Focus exclusively on these categories:
+
+1. **Low liability caps** — damage limits set unreasonably low relative to contract value or potential exposure (e.g., capped at fees paid in prior 12 months)
+2. **Broad exclusion of damages** — sweeping disclaimers of consequential, indirect, special, or punitive damages without reasonable exceptions
+3. **No carve-outs for key risks** — failure to exclude gross negligence, willful misconduct, data breaches, or IP infringement from liability caps
+4. **One-sided indemnities favoring vendor** — customer indemnifies vendor broadly while vendor provides narrow or no indemnification
+5. **Vendor performance disclaimers** — language disclaiming liability for service failures, data loss, or performance issues
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive liability or indemnification clauses are found, respond with exactly: No aggressive liability or indemnification clauses identified.

@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"html/template"
 	"time"
 )
 
@@ -23,6 +24,9 @@ type Submission struct {
 	AnalysisProgress int `json:"-"` // completed analysis count
 	AnalysisTotal    int `json:"-"` // total analysis count
 	AnalysisPercent  int `json:"-"` // percentage complete (0-100)
+
+	// Transient field for server-rendered HTML (bypasses template escaping)
+	AnalysisHTML template.HTML `json:"-"`
 }
 
 // HasOriginalFilename returns true if a PDF was uploaded

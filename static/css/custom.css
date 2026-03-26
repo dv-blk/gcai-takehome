@@ -38,30 +38,20 @@ html {
     outline-offset: 2px;
 }
 
-/* HTMX loading indicator */
-.htmx-request {
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
-
-.htmx-request::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid #50abda;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
+/* Fade-in animation for HTMX swapped content */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
 }
 
 /* Textarea resize handle styling */
@@ -78,9 +68,4 @@ label[for="pdf_file"]:hover {
 /* Button active states */
 button:active {
     transform: scale(0.98);
-}
-
-/* Smooth page transitions */
-#main-content {
-    transition: opacity 0.15s ease;
 }

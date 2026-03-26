@@ -132,3 +132,12 @@ func (db *DB) UpdateSubmissionStatus(id int64, status string) error {
 	`, status, time.Now(), id)
 	return err
 }
+
+// UpdateSubmissionPartialResult updates the analysis result without changing status.
+// Used for streaming partial results while analysis is still in progress.
+func (db *DB) UpdateSubmissionPartialResult(id int64, partialResult string) error {
+	_, err := db.Exec(`
+		UPDATE submissions SET analysis_result = ?, updated_at = ? WHERE id = ?
+	`, partialResult, time.Now(), id)
+	return err
+}

@@ -1,0 +1,31 @@
+Now analyze the contract for aggressive **Dispute Resolution & Governing Law** clauses. Focus exclusively on these categories:
+
+1. **Vendor-favorable jurisdiction** — choice of law or forum that disadvantages the customer (e.g., vendor's home state/country)
+2. **Mandatory arbitration** — required arbitration that limits customer's legal options, especially with unfavorable arbitration rules or venues
+3. **Limited remedies** — restrictions on available legal remedies or damages that customer can seek
+4. **Short claim windows** — unreasonably brief statutes of limitations or notice periods for bringing claims
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive dispute resolution or governing law clauses are found, respond with exactly: No aggressive dispute resolution or governing law clauses identified.

@@ -1,0 +1,33 @@
+Now analyze the contract for aggressive **Term & Termination** clauses. Focus exclusively on these categories:
+
+1. **Vendor-only termination for convenience** — terms that grant the vendor unilateral rights to terminate without cause while denying the same right to the customer
+2. **Restricted or penalized customer termination rights** — clauses that limit when/how the customer can terminate, or impose penalties for exercising termination rights
+3. **Long lock-in periods** — excessively long initial terms or renewal periods that limit flexibility
+4. **Expensive or missing termination assistance** — lack of transition support, or termination assistance priced punitively
+5. **Immediate termination for minor breaches** — disproportionate termination rights for trivial or curable violations
+6. **Data deletion upon termination** — terms allowing immediate data destruction without adequate retrieval period or export assistance
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive term or termination clauses are found, respond with exactly: No aggressive term or termination clauses identified.

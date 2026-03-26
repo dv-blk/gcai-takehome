@@ -1,0 +1,31 @@
+Now analyze the contract for aggressive **Product Changes & Roadmap** clauses. Focus exclusively on these categories:
+
+1. **Vendor can modify/discontinue features anytime** — unrestricted right to change, deprecate, or remove functionality without customer consent
+2. **No backward compatibility** — absence of commitments to maintain compatibility with existing integrations or workflows
+3. **No notice for changes** — lack of advance notification requirements before implementing material changes
+4. **Forced migrations** — requirements for customer to adopt new versions or platforms without adequate support or timeline
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive product changes or roadmap clauses are found, respond with exactly: No aggressive product changes or roadmap clauses identified.

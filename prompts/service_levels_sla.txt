@@ -1,0 +1,32 @@
+Now analyze the contract for aggressive **Service Levels (SLA)** clauses. Focus exclusively on these categories:
+
+1. **Weak uptime commitments** — vague or low availability targets (e.g., "commercially reasonable efforts" instead of specific percentages)
+2. **Broad exclusions from downtime calculations** — carve-outs that exclude scheduled maintenance, third-party issues, or other common outages from SLA measurements
+3. **Low, capped service credits as sole remedy** — service credits that are trivially small, capped at a low percentage of fees, or represent the exclusive remedy for outages
+4. **No penalties for repeated failures** — absence of escalating consequences or termination rights for chronic underperformance
+5. **No support SLAs** — lack of committed response times, resolution targets, or support availability guarantees
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive service level clauses are found, respond with exactly: No aggressive service level clauses identified.

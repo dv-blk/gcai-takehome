@@ -1,0 +1,31 @@
+Now analyze the contract for aggressive **Warranties & Disclaimers** clauses. Focus exclusively on these categories:
+
+1. **"As-is" service** — blanket disclaimers providing service without any warranties whatsoever
+2. **No performance warranties** — absence of commitments regarding service functionality, speed, or reliability
+3. **No compliance warranties** — lack of assurances that the service complies with applicable laws or regulations
+4. **No guarantees on data integrity/availability** — disclaimers of responsibility for data accuracy, completeness, or accessibility
+
+For each finding, output ONLY in this exact format:
+
+**Clause:**
+"[verbatim quote from the contract]"
+
+**Issue:**
+[What's wrong — clear and factual]
+
+**Risk:**
+[Why it matters — business/legal impact]
+
+**Fix:**
+[Concrete improvement or fallback negotiating position]
+
+**Confidence:**
+[Low / Medium / High]
+
+---
+
+Rules:
+- Separate each finding with `---`
+- No introductions, preambles, summaries, or closing commentary
+- Quote clauses verbatim from the contract text
+- If no aggressive warranty or disclaimer clauses are found, respond with exactly: No aggressive warranty or disclaimer clauses identified.
