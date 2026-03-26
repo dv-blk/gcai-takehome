@@ -7,8 +7,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
+	"contractanalyzer/analyzer"
 	"contractanalyzer/database"
 	"contractanalyzer/models"
 	"contractanalyzer/pdfutil"
@@ -38,13 +40,6 @@ type PageData struct {
 	Error            string
 }
 
-// AnalysisResultData represents data passed to the analysis result template
-type AnalysisResultData struct {
-	Title            string
-	ContractText     string
-	AnalysisMarkdown template.JS
-}
-
 // Index renders the main page - handles both form display and submission viewing via ?id=
 func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 	submissions, err := h.db.GetAllSubmissions()
@@ -71,6 +66,17 @@ func (h *Handler) Index(w http.ResponseWriter, r *http.Request) {
 					contractText = "(Error loading contract text)"
 				}
 				submission.ContractText = contractText
+
+				// Load analysis progress if still analyzing
+				if submission.Status == "analyzing" {
+					completed, total := analyzer.GetProgress(submission.ID)
+					submission.AnalysisProgress = completed
+					submission.AnalysisTotal = total
+					if total > 0 {
+						submission.AnalysisPercent = (completed * 100) / total
+					}
+				}
+
 				data.ActiveSubmission = submission
 				data.ActiveID = submission.ID
 				data.ShowForm = false
@@ -193,26 +199,41 @@ func (h *Handler) CreateSubmission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate analysis (example markdown for now)
-	analysisMarkdown := getExampleAnalysis()
-
-	// Update submission with analysis result
-	if err := h.db.UpdateSubmissionAnalysis(id, analysisMarkdown, "complete"); err != nil {
-		h.renderError(w, "Error updating analysis: "+err.Error())
+	// Set status to analyzing and submit to background queue
+	if err := h.db.UpdateSubmissionStatus(id, "analyzing"); err != nil {
+		h.renderError(w, "Error updating submission status: "+err.Error())
 		return
+	}
+
+	// Submit analysis jobs to the queue (async - returns immediately)
+	contractFullPath := filepath.Join(storage.ContractsDir, filename)
+	if err := analyzer.SubmitAnalysis(id, contractFullPath); err != nil {
+		log.Printf("Failed to submit analysis for submission %d: %v", id, err)
+		// Mark as complete with error message
+		h.db.UpdateSubmissionAnalysis(id, "Analysis submission failed: "+err.Error(), "complete")
 	}
 
 	// Set HTMX headers for URL update
 	w.Header().Set("HX-Push-Url", "/?id="+strconv.FormatInt(id, 10))
 
-	// Render the analysis result
-	data := AnalysisResultData{
-		Title:            title,
-		ContractText:     contractText,
-		AnalysisMarkdown: template.JS(analysisMarkdown),
+	// Load the submission to render the view (will show analyzing status with polling)
+	submission, err = h.db.GetSubmission(id)
+	if err != nil {
+		h.renderError(w, "Error loading submission: "+err.Error())
+		return
+	}
+	submission.ContractText = contractText
+
+	// Get initial progress
+	completed, total := analyzer.GetProgress(id)
+	submission.AnalysisProgress = completed
+	submission.AnalysisTotal = total
+	if total > 0 {
+		submission.AnalysisPercent = (completed * 100) / total
 	}
 
-	if err := h.tmpl.ExecuteTemplate(w, "analysis_result.html", data); err != nil {
+	// Render the submission view (will include polling for analyzing status)
+	if err := h.tmpl.ExecuteTemplate(w, "submission_view.html", submission); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -282,143 +303,4 @@ func (h *Handler) renderSidebarOOB(w http.ResponseWriter, activeID int64) error 
 
 	w.Write([]byte(`</nav>`))
 	return nil
-}
-
-// getExampleAnalysis returns example markdown analysis
-func getExampleAnalysis() string {
-	return `---
-
-**Clause:**  
-"Provider reserves the right to modify pricing at any time with seven (7) days written notice."
-
-**Issue:**  
-Unilateral price increases with minimal notice period.
-
-**Risk:**  
-Budget unpredictability; vendor could significantly increase costs mid-contract with insufficient time to evaluate alternatives or negotiate.
-
-**Fix:**  
-Require 90-day notice for price changes; cap annual increases at CPI + 3%; or lock pricing for the initial term with agreed escalation schedule.
-
-**Confidence:**  
-High
-
----
-
-**Clause:**  
-"All fees are non-refundable, including unused portions of prepaid subscriptions."
-
-**Issue:**  
-No refund rights regardless of service quality or early termination.
-
-**Risk:**  
-Financial loss if service is unsatisfactory or business needs change; no leverage for service issues.
-
-**Fix:**  
-Negotiate pro-rata refunds for unused service periods; add termination for cause with refund rights.
-
-**Confidence:**  
-High
-
----
-
-**Clause:**  
-"This Agreement shall automatically renew for successive two (2) year terms unless Customer provides written notice at least ninety (90) days prior."
-
-**Issue:**  
-Long auto-renewal period with early cancellation deadline.
-
-**Risk:**  
-Easy to miss the 90-day window, resulting in unwanted 2-year commitments and budget lock-in.
-
-**Fix:**  
-Reduce to 1-year auto-renewal with 30-day notice requirement; request renewal reminder from vendor; or require opt-in renewal.
-
-**Confidence:**  
-High
-
----
-
-**Clause:**  
-"Customer grants Provider a perpetual, irrevocable, royalty-free license to use Customer Data in anonymized form for any purpose, including commercial sale."
-
-**Issue:**  
-Overly broad data rights that survive termination and allow commercial exploitation.
-
-**Risk:**  
-Competitive intelligence leakage; customer data could benefit competitors; regulatory concerns with "anonymized" data that may be re-identifiable.
-
-**Fix:**  
-Limit to aggregate statistics only; prohibit sale to third parties; add deletion requirement upon termination; require explicit consent for any commercial use.
-
-**Confidence:**  
-High
-
----
-
-**Clause:**  
-"PROVIDER'S TOTAL LIABILITY SHALL NOT EXCEED THE FEES PAID IN THE THREE (3) MONTHS PRECEDING THE CLAIM."
-
-**Issue:**  
-Severely limited liability cap.
-
-**Risk:**  
-Inadequate recovery for significant damages; 3-month cap may be trivial compared to actual losses from data breach or service failure.
-
-**Fix:**  
-Negotiate 12-month fee cap minimum; carve out gross negligence, willful misconduct, and data breaches; consider requiring cyber insurance.
-
-**Confidence:**  
-High
-
----
-
-**Clause:**  
-"Customer shall indemnify Provider against any and all claims arising from Customer's use of the Service."
-
-**Issue:**  
-One-sided indemnification favoring vendor.
-
-**Risk:**  
-Customer bears all legal defense costs even for issues caused by the service; unlimited exposure.
-
-**Fix:**  
-Make indemnification mutual; limit to claims arising from actual breach or negligence; cap indemnification liability.
-
-**Confidence:**  
-Medium
-
----
-
-**Clause:**  
-"Provider may audit Customer's use of the Service upon twenty-four (24) hours notice."
-
-**Issue:**  
-Minimal notice for potentially disruptive audits.
-
-**Risk:**  
-Business disruption; potential access to sensitive systems with little preparation time.
-
-**Fix:**  
-Require 30-day notice for routine audits; limit audit scope and frequency (e.g., once per year); require confidentiality of audit findings.
-
-**Confidence:**  
-Medium
-
----
-
-**Clause:**  
-"Customer waives any right to participate in class action lawsuits against Provider."
-
-**Issue:**  
-Class action waiver limits collective legal remedies.
-
-**Risk:**  
-Reduced leverage for small but widespread issues; forces individual arbitration which favors well-resourced vendors.
-
-**Fix:**  
-Strike this clause if possible; alternatively, ensure individual arbitration is fair and accessible.
-
-**Confidence:**  
-Medium`
 }

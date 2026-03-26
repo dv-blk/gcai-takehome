@@ -1,0 +1,13 @@
+Analyze the contract for data privacy and security concerns.
+Look for:
+- Data collection and retention clauses
+- Third-party sharing provisions
+- Security obligations
+- Breach notification requirements
+
+Output format for each issue:
+**Clause:** [quote the relevant clause]
+**Issue:** [what's problematic]
+**Risk:** [potential business impact]
+**Fix:** [recommended change]
+**Confidence:** [High/Medium/Low]

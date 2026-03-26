@@ -18,6 +18,11 @@ type Submission struct {
 
 	// Transient field - not stored in DB, loaded from file on demand
 	ContractText string `json:"-"`
+
+	// Transient fields for analysis progress (populated when status is "analyzing")
+	AnalysisProgress int `json:"-"` // completed analysis count
+	AnalysisTotal    int `json:"-"` // total analysis count
+	AnalysisPercent  int `json:"-"` // percentage complete (0-100)
 }
 
 // HasOriginalFilename returns true if a PDF was uploaded

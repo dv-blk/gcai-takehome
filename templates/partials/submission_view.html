@@ -90,12 +90,28 @@
         </script>
     </div>
     {{else if eq .Status "analyzing"}}
-    <div class="border-t border-bg-muted/30 dark:border-gray-700 pt-6">
+    <div class="border-t border-bg-muted/30 dark:border-gray-700 pt-6"
+         hx-get="/?id={{.ID}}"
+         hx-trigger="every 2s"
+         hx-target="#main-content"
+         hx-swap="innerHTML">
         <div class="text-center py-8">
             <svg class="mx-auto h-12 w-12 text-accent animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <p class="mt-3 text-sm text-text-subtle dark:text-gray-400">Analyzing contract... This may take a moment.</p>
+            <p class="mt-3 text-sm text-text-subtle dark:text-gray-400">Analyzing contract...</p>
+            {{if gt .AnalysisTotal 0}}
+            <p class="mt-2 text-sm font-medium text-accent">
+                {{.AnalysisProgress}} of {{.AnalysisTotal}} analyses complete
+            </p>
+                <div class="mt-3 w-48 mx-auto bg-bg-muted/30 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-accent h-2 rounded-full transition-all duration-300" 
+                         style="width: {{.AnalysisPercent}}%">
+                    </div>
+                </div>
+            {{else}}
+            <p class="mt-2 text-xs text-text-subtle dark:text-gray-500">Preparing analysis...</p>
+            {{end}}
         </div>
     </div>
     {{else}}

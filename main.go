@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"contractanalyzer/analyzer"
 	"contractanalyzer/database"
 	"contractanalyzer/handlers"
 	"contractanalyzer/storage"
@@ -31,6 +32,9 @@ func main() {
 	if err := db.Migrate(); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
+
+	// Initialize analysis queue
+	analyzer.InitQueue(db)
 
 	// Parse all templates
 	tmpl, err := parseTemplates()

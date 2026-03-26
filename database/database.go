@@ -124,3 +124,11 @@ func (db *DB) UpdateSubmissionAnalysis(id int64, analysis string, status string)
 	`, analysis, status, time.Now(), id)
 	return err
 }
+
+// UpdateSubmissionStatus updates only the status field
+func (db *DB) UpdateSubmissionStatus(id int64, status string) error {
+	_, err := db.Exec(`
+		UPDATE submissions SET status = ?, updated_at = ? WHERE id = ?
+	`, status, time.Now(), id)
+	return err
+}
