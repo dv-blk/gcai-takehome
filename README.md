@@ -14,7 +14,7 @@ The easiest way to run the analyzer is with Docker Compose.
 
 ```bash
 git clone <repository-url>
-cd contractanalyzer
+cd gcai-takehome
 docker compose up -d
 ```
 
