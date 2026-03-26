@@ -1,0 +1,97 @@
+package main
+
+import (
+	"html/template"
+	"log"
+	"net/http"
+	"path/filepath"
+
+	"contractanalyzer/database"
+	"contractanalyzer/handlers"
+	"contractanalyzer/storage"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+func main() {
+	// Initialize storage directories
+	if err := storage.Init(); err != nil {
+		log.Fatalf("Failed to initialize storage: %v", err)
+	}
+
+	// Open database
+	db, err := database.Open("data/contractanalyzer.db")
+	if err != nil {
+		log.Fatalf("Failed to open database: %v", err)
+	}
+	defer db.Close()
+
+	// Run migrations
+	if err := db.Migrate(); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
+	// Parse all templates
+	tmpl, err := parseTemplates()
+	if err != nil {
+		log.Fatalf("Failed to parse templates: %v", err)
+	}
+
+	// Create handler with database
+	h := handlers.New(tmpl, db)
+
+	// Create router
+	r := chi.NewRouter()
+
+	// Middleware
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	// Static files
+	fileServer := http.FileServer(http.Dir("static"))
+	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
+
+	// Routes
+	r.Get("/", h.Index)
+	r.Get("/new", h.NewSubmissionForm)
+	r.Post("/submissions", h.CreateSubmission)
+
+	// Start server
+	log.Println("Server starting on http://0.0.0.0:8080")
+	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {
+		log.Fatalf("Server failed: %v", err)
+	}
+}
+
+func parseTemplates() (*template.Template, error) {
+	// Parse layout first
+	tmpl, err := template.ParseFiles("templates/layout.html")
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse all other templates
+	patterns := []string{
+		"templates/*.html",
+		"templates/partials/*.html",
+	}
+
+	for _, pattern := range patterns {
+		files, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range files {
+			if file == "templates/layout.html" {
+				continue // Already parsed
+			}
+			_, err = tmpl.ParseFiles(file)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return tmpl, nil
+}

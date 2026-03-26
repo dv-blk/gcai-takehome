@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Clause Analyzer</title>
+    
+    <!-- Tailwind CSS CDN with custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: {
+                            DEFAULT: '#fffaf5',
+                            surface: '#f0e9e2',
+                            muted: '#cab8b0',
+                        },
+                        accent: {
+                            DEFAULT: '#50abda',
+                            75: '#50abdabf',
+                        },
+                        text: {
+                            DEFAULT: '#05151b',
+                            muted: '#003047',
+                            subtle: '#4a4f5a',
+                        },
+                        dark: {
+                            bg: '#0e1525',
+                            surface: '#003047d9',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/css/custom.css">
+    
+    <!-- Dark mode script -->
+    <script>
+        // Check for saved theme preference or system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-bg dark:bg-dark-bg text-text dark:text-gray-100 transition-colors duration-200">
+    <div class="min-h-full flex flex-col">
+        <!-- Header -->
+        <header class="bg-bg-surface dark:bg-dark-surface border-b border-bg-muted/30 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo / App Name -->
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                            <svg class="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-semibold text-text dark:text-white">Contract Clause Analyzer</h1>
+                            <p class="text-xs text-text-subtle dark:text-gray-400">Vendor Agreement Risk Assessment</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Dark Mode Toggle -->
+                    <button 
+                        onclick="toggleDarkMode()"
+                        class="p-2 rounded-lg bg-bg dark:bg-dark-bg border border-bg-muted/30 dark:border-gray-600 hover:bg-bg-muted/20 dark:hover:bg-gray-700 transition-colors"
+                        aria-label="Toggle dark mode"
+                    >
+                        <!-- Sun icon (shown in dark mode) -->
+                        <svg class="h-5 w-5 hidden dark:block text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <!-- Moon icon (shown in light mode) -->
+                        <svg class="h-5 w-5 block dark:hidden text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Main Panel -->
+                <div class="flex-1 order-2 lg:order-1">
+                    <div id="main-content" class="bg-bg-surface dark:bg-dark-surface rounded-lg border border-bg-muted/30 dark:border-gray-700 p-6">
+                        {{if .ShowForm}}
+                            {{template "submission_form.html" .}}
+                        {{else if .ActiveSubmission}}
+                            {{template "submission_view.html" .ActiveSubmission}}
+                        {{else}}
+                            {{template "submission_form.html" .}}
+                        {{end}}
+                    </div>
+                </div>
+                
+                <!-- Sidebar: Previous Submissions (Right Side) -->
+                <aside class="lg:w-72 flex-shrink-0 order-1 lg:order-2">
+                    <div class="bg-bg-surface dark:bg-dark-surface rounded-lg border border-bg-muted/30 dark:border-gray-700 p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-semibold text-text dark:text-white">Submissions</h2>
+                            <button 
+                                hx-get="/new"
+                                hx-target="#main-content"
+                                hx-swap="innerHTML"
+                                hx-push-url="/"
+                                class="px-3 py-1.5 text-sm bg-accent hover:bg-accent-75 text-white rounded-md transition-colors flex items-center space-x-1"
+                            >
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>New</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Submissions List -->
+                        {{template "sidebar.html" .}}
+                    </div>
+                </aside>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-bg-surface dark:bg-dark-surface border-t border-bg-muted/30 dark:border-gray-700 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <p class="text-center text-sm text-text-subtle dark:text-gray-400">
+                    Contract Clause Analyzer - Demo Application
+                </p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
