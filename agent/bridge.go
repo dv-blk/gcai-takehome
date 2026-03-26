@@ -20,26 +20,34 @@ type BridgeServer struct {
 	cmd     *exec.Cmd
 	port    int
 	baseURL string
-	tempDir string
+	tempDir string // Empty when using external OpenCode server
 	logFunc func(format string, args ...interface{})
 }
 
-// StartBridge starts an isolated Node.js bridge (which starts OpenCode internally).
-// It creates isolated data/config directories and copies auth.json from the default location.
+// StartBridge starts a Node.js bridge subprocess.
+//
+// If OPENCODE_SERVER_URL env var is set, the bridge connects to an external
+// OpenCode server (e.g., smanx/opencode container) instead of spawning its own.
+// In this mode, auth.json check and XDG isolation are skipped.
+//
+// If OPENCODE_SERVER_URL is not set, the bridge spawns its own OpenCode server
+// internally, using auth.json from the default location with XDG isolation.
+//
 // logFunc is called with each line of server output (pass log.Printf or t.Logf).
 func StartBridge(ctx context.Context, logFunc func(format string, args ...interface{})) (*BridgeServer, error) {
+	// Check if we're connecting to an external OpenCode server
+	externalOpencodeURL := os.Getenv("OPENCODE_SERVER_URL")
+	useExternalOpencode := externalOpencodeURL != ""
+
 	// Check prerequisites
-	if !IsOpenCodeInstalled() {
-		return nil, fmt.Errorf("opencode not found in PATH")
+	if !useExternalOpencode {
+		// Only need opencode binary if we're spawning our own server
+		if !IsOpenCodeInstalled() {
+			return nil, fmt.Errorf("opencode not found in PATH")
+		}
 	}
 	if !IsNodeInstalled() {
 		return nil, fmt.Errorf("node not found in PATH")
-	}
-
-	// Check if auth.json exists at default location
-	defaultAuthPath := GetDefaultAuthPath()
-	if _, err := os.Stat(defaultAuthPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("auth.json not found at %s - please authenticate with opencode first", defaultAuthPath)
 	}
 
 	// Ensure node_modules exists
@@ -54,57 +62,85 @@ func StartBridge(ctx context.Context, logFunc func(format string, args ...interf
 		}
 	}
 
-	// Create isolated temp directories
-	tempDir, err := os.MkdirTemp("", "opencode-test-*")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp dir: %w", err)
-	}
+	var tempDir string
+	var cmdEnv []string
 
-	dataDir := filepath.Join(tempDir, "opencode")
-	configDir := filepath.Join(tempDir, "config", "opencode")
+	if useExternalOpencode {
+		// External mode: no XDG isolation needed, bridge connects to external server
+		logFunc("Using external OpenCode server at %s", externalOpencodeURL)
+		cmdEnv = os.Environ()
+	} else {
+		// Embedded mode: create isolated XDG directories and copy auth.json
+		defaultAuthPath := GetDefaultAuthPath()
+		if _, err := os.Stat(defaultAuthPath); os.IsNotExist(err) {
+			return nil, fmt.Errorf("auth.json not found at %s - please authenticate with opencode first", defaultAuthPath)
+		}
 
-	if err := os.MkdirAll(dataDir, 0755); err != nil {
-		os.RemoveAll(tempDir)
-		return nil, fmt.Errorf("failed to create data dir: %w", err)
-	}
-	if err := os.MkdirAll(configDir, 0755); err != nil {
-		os.RemoveAll(tempDir)
-		return nil, fmt.Errorf("failed to create config dir: %w", err)
-	}
+		var err error
+		tempDir, err = os.MkdirTemp("", "opencode-test-*")
+		if err != nil {
+			return nil, fmt.Errorf("failed to create temp dir: %w", err)
+		}
 
-	// Copy auth.json from default location to isolated data dir
-	if err := copyFile(defaultAuthPath, filepath.Join(dataDir, "auth.json")); err != nil {
-		os.RemoveAll(tempDir)
-		return nil, fmt.Errorf("failed to copy auth.json: %w", err)
+		dataDir := filepath.Join(tempDir, "opencode")
+		configDir := filepath.Join(tempDir, "config", "opencode")
+
+		if err := os.MkdirAll(dataDir, 0755); err != nil {
+			os.RemoveAll(tempDir)
+			return nil, fmt.Errorf("failed to create data dir: %w", err)
+		}
+		if err := os.MkdirAll(configDir, 0755); err != nil {
+			os.RemoveAll(tempDir)
+			return nil, fmt.Errorf("failed to create config dir: %w", err)
+		}
+
+		// Copy auth.json from default location to isolated data dir
+		if err := copyFile(defaultAuthPath, filepath.Join(dataDir, "auth.json")); err != nil {
+			os.RemoveAll(tempDir)
+			return nil, fmt.Errorf("failed to copy auth.json: %w", err)
+		}
+
+		cmdEnv = append(os.Environ(),
+			fmt.Sprintf("XDG_DATA_HOME=%s", tempDir),
+			fmt.Sprintf("XDG_CONFIG_HOME=%s", filepath.Join(tempDir, "config")),
+			fmt.Sprintf("XDG_STATE_HOME=%s", filepath.Join(tempDir, "state")),
+			fmt.Sprintf("XDG_CACHE_HOME=%s", filepath.Join(tempDir, "cache")),
+		)
 	}
 
 	// Find available port for the bridge
 	bridgePort, err := findAvailablePort()
 	if err != nil {
-		os.RemoveAll(tempDir)
+		if tempDir != "" {
+			os.RemoveAll(tempDir)
+		}
 		return nil, fmt.Errorf("failed to find available port: %w", err)
 	}
 
-	// Start the Node.js bridge
+	// Build bridge command arguments
 	bridgeScript := filepath.Join(bridgeDir, "bridge.mjs")
-	cmd := exec.CommandContext(ctx, "node", bridgeScript,
+	bridgeArgs := []string{
+		bridgeScript,
 		fmt.Sprintf("--port=%d", bridgePort),
 		"--log-level=WARN",
-	)
+	}
+	if useExternalOpencode {
+		bridgeArgs = append(bridgeArgs, fmt.Sprintf("--opencode-url=%s", externalOpencodeURL))
+	}
+
+	// Start the Node.js bridge
+	cmd := exec.CommandContext(ctx, "node", bridgeArgs...)
 	cmd.Dir = bridgeDir
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("XDG_DATA_HOME=%s", tempDir),
-		fmt.Sprintf("XDG_CONFIG_HOME=%s", filepath.Join(tempDir, "config")),
-		fmt.Sprintf("XDG_STATE_HOME=%s", filepath.Join(tempDir, "state")),
-		fmt.Sprintf("XDG_CACHE_HOME=%s", filepath.Join(tempDir, "cache")),
-	)
+	cmd.Env = cmdEnv
 
 	// Capture stdout (bridge ready signal) and stderr (logs)
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
 
 	if err := cmd.Start(); err != nil {
-		os.RemoveAll(tempDir)
+		if tempDir != "" {
+			os.RemoveAll(tempDir)
+		}
 		return nil, fmt.Errorf("failed to start bridge: %w", err)
 	}
 
@@ -123,7 +159,9 @@ func StartBridge(ctx context.Context, logFunc func(format string, args ...interf
 	if err != nil {
 		cmd.Process.Kill()
 		cmd.Wait()
-		os.RemoveAll(tempDir)
+		if tempDir != "" {
+			os.RemoveAll(tempDir)
+		}
 		return nil, fmt.Errorf("bridge failed to start: %w", err)
 	}
 
@@ -131,7 +169,9 @@ func StartBridge(ctx context.Context, logFunc func(format string, args ...interf
 	if err := waitForHTTP(ctx, baseURL+"/health", 30*time.Second); err != nil {
 		cmd.Process.Kill()
 		cmd.Wait()
-		os.RemoveAll(tempDir)
+		if tempDir != "" {
+			os.RemoveAll(tempDir)
+		}
 		return nil, fmt.Errorf("bridge health check failed: %w", err)
 	}
 

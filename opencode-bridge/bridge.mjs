@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { createOpencode } from "@opencode-ai/sdk/v2";
+import { createOpencode, createOpencodeClient } from "@opencode-ai/sdk/v2";
 
 // Parse CLI args
 const args = process.argv.slice(2);
@@ -10,37 +10,51 @@ function getArg(name) {
 
 const port = parseInt(getArg("port") || "0", 10);
 const opencodePort = parseInt(getArg("opencode-port") || "0", 10);
+const opencodeURL = getArg("opencode-url") || process.env.OPENCODE_URL;
 const logLevel = getArg("log-level") || "WARN";
 
 if (!port) {
-  console.error("Usage: node bridge.mjs --port=PORT [--opencode-port=PORT] [--log-level=LEVEL]");
+  console.error("Usage: node bridge.mjs --port=PORT [--opencode-port=PORT] [--opencode-url=URL] [--log-level=LEVEL]");
   process.exit(1);
 }
 
 const log = (msg, ...a) => console.error(`[bridge] ${msg}`, ...a);
 
-// Start OpenCode server and create client
-log("Starting OpenCode server...");
-const { client, server } = await createOpencode({
-  port: opencodePort || undefined,
-  config: {
-    logLevel,
-    lsp: false,
-    formatter: false,
-    permission: {
-      read: "allow",
-      edit: "deny",
-      bash: "deny",
-      glob: "deny",
-      grep: "deny",
-      list: "deny",
-      external_directory: "deny",
-      task: "deny",
-      webfetch: "deny",
+// Initialize OpenCode client (either connect to external server or spawn our own)
+let client;
+let server = null;
+
+if (opencodeURL) {
+  // External mode: connect to an existing OpenCode server
+  log(`Connecting to external OpenCode server at ${opencodeURL}...`);
+  client = createOpencodeClient({ baseUrl: opencodeURL });
+  log(`Connected to external OpenCode server at ${opencodeURL}`);
+} else {
+  // Embedded mode: start our own OpenCode server
+  log("Starting embedded OpenCode server...");
+  const result = await createOpencode({
+    port: opencodePort || undefined,
+    config: {
+      logLevel,
+      lsp: false,
+      formatter: false,
+      permission: {
+        read: "allow",
+        edit: "deny",
+        bash: "deny",
+        glob: "deny",
+        grep: "deny",
+        list: "deny",
+        external_directory: "deny",
+        task: "deny",
+        webfetch: "deny",
+      },
     },
-  },
-});
-log(`OpenCode server started at ${server.url}`);
+  });
+  client = result.client;
+  server = result.server;
+  log(`Embedded OpenCode server started at ${server.url}`);
+}
 
 // Read JSON body from request
 function readBody(req) {
@@ -238,7 +252,7 @@ async function handleDeleteSession(req, res) {
 const httpServer = createServer(async (req, res) => {
   try {
     if (req.method === "GET" && req.url === "/health") {
-      return sendJSON(res, 200, { ok: true, opencodeUrl: server.url });
+      return sendJSON(res, 200, { ok: true, opencodeUrl: server?.url || opencodeURL });
     }
 
     if (req.method === "POST" && req.url === "/prompt") {
@@ -266,7 +280,9 @@ httpServer.listen(port, "127.0.0.1", () => {
 function shutdown() {
   log("Shutting down...");
   httpServer.close();
-  server.close();
+  if (server) {
+    server.close();
+  }
   process.exit(0);
 }
 

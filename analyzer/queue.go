@@ -3,7 +3,7 @@ package analyzer
 import (
 	"context"
 	"log"
-	"path/filepath"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -11,7 +11,6 @@ import (
 
 	"contractanalyzer/agent"
 	"contractanalyzer/database"
-	"contractanalyzer/storage"
 )
 
 // MaxWorkers is the maximum number of concurrent analysis workers.
@@ -77,12 +76,17 @@ func (q *Queue) worker(id int) {
 		cfg := agent.DefaultConfig()
 		cfg.BridgeURL = q.bridgeURL
 
-		// Scope the session's working directory to the contracts directory
-		contractsDir, err := filepath.Abs(storage.ContractsDir)
-		if err != nil {
-			contractsDir = storage.ContractsDir
+		// Set the session's working directory.
+		// In Docker, OPENCODE_PROJECT_DIR points to the OpenCode server's project root (/workspace).
+		// Locally, we default to the current working directory.
+		if projectDir := os.Getenv("OPENCODE_PROJECT_DIR"); projectDir != "" {
+			cfg.Directory = projectDir
+		} else {
+			// Default: use current working directory (project root in local dev)
+			if cwd, err := os.Getwd(); err == nil {
+				cfg.Directory = cwd
+			}
 		}
-		cfg.Directory = contractsDir
 
 		ag, err := agent.New(ctx, cfg)
 		if err != nil {
@@ -115,9 +119,11 @@ func (q *Queue) processBatch(ctx context.Context, ag *agent.Agent, batch Submiss
 
 	// Step 1: Initialize session (reads the contract file)
 	// This does NOT count toward progress — it's just setup
+	// Use the relative path (e.g., "data/contracts/contract_1_xxx.txt") so it resolves
+	// correctly from the project root in both local dev and Docker.
 	log.Printf("Initializing session for submission %d", batch.SubmissionID)
 	var err error
-	sessionID, err = ag.InitSession(ctx, filepath.Base(batch.ContractFilePath))
+	sessionID, err = ag.InitSession(ctx, batch.ContractFilePath)
 	if err != nil {
 		log.Printf("Failed to initialize session for submission %d: %v", batch.SubmissionID, err)
 		q.failSubmission(batch.SubmissionID, "Failed to read contract file")

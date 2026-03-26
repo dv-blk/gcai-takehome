@@ -1,0 +1,32 @@
+# Runtime data
+data/
+
+# Dependencies (installed in Docker build)
+node_modules/
+opencode-bridge/node_modules/
+
+# Built binary
+contractanalyzer
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+LICENSE
+
+# Test files
+testdata/
+*_test.go
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Misc
+.env
+.env.*

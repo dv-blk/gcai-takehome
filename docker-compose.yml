@@ -1,0 +1,43 @@
+services:
+  # OpenCode server - provides LLM access and web UI for authentication
+  opencode:
+    image: smanx/opencode:latest
+    container_name: opencode
+    ports:
+      - "4097:4096"  # Web UI for authentication (host 4097 -> container 4096)
+    volumes:
+      - opencode-data:/root/.local/share/opencode
+      - opencode-config:/root/.config/opencode
+      - app-data:/workspace/data              # Shared: contract files from app
+      - ./opencode.json:/workspace/opencode.json:ro  # Permission config (read-only agent)
+    environment:
+      - OPENCODE_HOSTNAME=0.0.0.0
+      - OPENCODE_PORT=4096
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4096"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    restart: unless-stopped
+
+  # Contract Analyzer application
+  app:
+    build: .
+    container_name: contractanalyzer
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENCODE_SERVER_URL=http://opencode:4096
+      - OPENCODE_PROJECT_DIR=/workspace       # OpenCode server's project root
+    volumes:
+      - app-data:/app/data
+    depends_on:
+      opencode:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  opencode-data:    # OpenCode auth credentials and session data
+  opencode-config:  # OpenCode configuration
+  app-data:         # SQLite database and contract files
